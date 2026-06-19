@@ -212,6 +212,14 @@ export const getMyDefenseQualification = (thesisId) => {
   })
 }
 
+export const updateQualification = (id, eligible, reason) => {
+  return request({
+    url: `/defense-qualification/${id}/update`,
+    method: 'post',
+    params: { eligible, reason },
+  })
+}
+
 export const getAllBatches = () => {
   return request({
     url: '/system/batches',
