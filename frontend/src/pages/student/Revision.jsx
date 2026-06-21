@@ -30,6 +30,7 @@ function StudentRevision() {
       await submitRevision({
         thesisId: id,
         revisionDescription: values.revisionDescription,
+        differenceDescription: values.differenceDescription,
         fileName: file.name,
         fileUrl: `/mock/${file.name}`,
         fileSize: file.size || 0,
@@ -81,7 +82,16 @@ function StudentRevision() {
             rules={[{ required: true, message: '请填写修改说明' }]}
             extra="请详细说明针对专家意见的修改内容，可按意见逐条列出"
           >
-            <TextArea rows={10} placeholder="请详细说明修改内容，例如：&#10;1. 针对专家1的创新性质疑，补充了XX实验，增加了XX分析...&#10;2. 针对专家2的写作问题，修改了摘要、第3章..." />
+            <TextArea rows={8} placeholder="请详细说明修改内容，例如：&#10;1. 针对专家1的创新性质疑，补充了XX实验，增加了XX分析...&#10;2. 针对专家2的写作问题，修改了摘要、第3章..." />
+          </Form.Item>
+
+          <Form.Item
+            name="differenceDescription"
+            label="差异说明"
+            rules={[{ required: true, message: '请填写差异说明' }]}
+            extra="请详细说明本版本与上一版本的主要差异，便于专家复审时对比查看"
+          >
+            <TextArea rows={6} placeholder="请说明本版本与上一版本的主要差异，例如：&#10;1. 第2章新增了XX相关工作综述&#10;2. 第4章补充了3组对比实验&#10;3. 修改了摘要、引言和结论的表述..." />
           </Form.Item>
 
           <Form.Item

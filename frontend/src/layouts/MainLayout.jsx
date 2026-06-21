@@ -11,6 +11,7 @@ import {
   LogoutOutlined,
   BookOutlined,
   CheckCircleOutlined,
+  RetweetOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom'
 import { useEffect, useState } from 'react'
@@ -36,6 +37,7 @@ const menuConfig = {
     { key: '/graduate', icon: <DashboardOutlined />, label: '工作台' },
     { key: '/graduate/expert-match', icon: <TeamOutlined />, label: '专家匹配' },
     { key: '/graduate/review-progress', icon: <ScheduleOutlined />, label: '评审进度' },
+    { key: '/graduate/major-revision-review', icon: <RetweetOutlined />, label: '复审审核' },
     { key: '/graduate/defense-qualification', icon: <TrophyOutlined />, label: '答辩资格' },
     { key: '/graduate/system', icon: <SettingOutlined />, label: '系统管理' },
   ],

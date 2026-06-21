@@ -110,11 +110,18 @@ public class ReviewService {
 
         SysUser expert = sysUserMapper.selectById(expertId);
 
+        Thesis thesis = thesisMapper.selectById(dto.getThesisId());
+        int reviewRound = 1;
+        if (thesis.getIsMajorRevision() != null && thesis.getIsMajorRevision() == 1) {
+            reviewRound = 2;
+        }
+
         ReviewComment comment = new ReviewComment();
         comment.setThesisId(dto.getThesisId());
         comment.setExpertId(expertId);
         comment.setExpertName("外审专家" + (expertId % 100));
         comment.setInvitationId(dto.getInvitationId());
+        comment.setReviewRound(reviewRound);
         comment.setOverallEvaluation(dto.getOverallEvaluation());
         comment.setScore(dto.getScore());
         comment.setResult(dto.getResult());
@@ -156,15 +163,27 @@ public class ReviewService {
         if (completedCount > 0 && completedCount == acceptedCount) {
             Thesis thesis = thesisMapper.selectById(thesisId);
             String fromStatus = thesis.getStatus();
-            thesis.setStatus(ThesisStatusEnum.REVIEW_COMPLETED.getCode());
-            thesis.setCurrentStage("评阅完成，等待处理");
+
+            if (thesis.getFirstReviewCompleteTime() == null) {
+                thesis.setFirstReviewCompleteTime(LocalDateTime.now());
+            }
+
+            if (thesis.getIsMajorRevision() != null && thesis.getIsMajorRevision() == 1) {
+                thesis.setStatus(ThesisStatusEnum.GRADUATE_SCHOOL_REVIEWING.getCode());
+                thesis.setCurrentStage("研究生院复审审核中");
+            } else {
+                thesis.setStatus(ThesisStatusEnum.REVIEW_COMPLETED.getCode());
+                thesis.setCurrentStage("评阅完成，等待处理");
+            }
             thesis.setReviewCompleteTime(LocalDateTime.now());
             thesisMapper.updateById(thesis);
 
             saveLog(thesisId, "全部评阅完成", "SYSTEM", 0L, "系统",
-                    fromStatus, ThesisStatusEnum.REVIEW_COMPLETED.getCode(), "所有外审专家已完成评阅");
+                    fromStatus, thesis.getStatus(), "所有外审专家已完成评阅");
 
-            determineDefenseQualification(thesisId);
+            if (thesis.getIsMajorRevision() == null || thesis.getIsMajorRevision() == 0) {
+                determineDefenseQualification(thesisId);
+            }
         }
     }
 
@@ -204,13 +223,29 @@ public class ReviewService {
             qualification.setEligible(false);
             qualification.setReason("部分专家评定不合格，需要修改后重新送审");
 
-            String fromStatus = thesis.getStatus();
-            thesis.setStatus(ThesisStatusEnum.STUDENT_REVISING.getCode());
-            thesis.setCurrentStage("学生修改中");
-            thesisMapper.updateById(thesis);
+            long hasMajorIssues = comments.stream()
+                    .filter(c -> c.getMajorIssues() != null && !c.getMajorIssues().trim().isEmpty())
+                    .count();
 
-            saveLog(thesisId, "进入修改阶段", "SYSTEM", 0L, "系统",
-                    fromStatus, ThesisStatusEnum.STUDENT_REVISING.getCode(), "有" + failCount + "位专家评定不合格，学生需要修改");
+            String fromStatus = thesis.getStatus();
+            if (hasMajorIssues > 0) {
+                thesis.setIsMajorRevision(1);
+                thesis.setStatus(ThesisStatusEnum.STUDENT_REVISING.getCode());
+                thesis.setCurrentStage("学生重大修改中");
+                thesisMapper.updateById(thesis);
+
+                saveLog(thesisId, "进入重大修改阶段", "SYSTEM", 0L, "系统",
+                        fromStatus, ThesisStatusEnum.STUDENT_REVISING.getCode(),
+                        "有" + hasMajorIssues + "位专家指出存在重大问题，需要重大修改后进入复审");
+            } else {
+                thesis.setIsMajorRevision(0);
+                thesis.setStatus(ThesisStatusEnum.STUDENT_REVISING.getCode());
+                thesis.setCurrentStage("学生修改中");
+                thesisMapper.updateById(thesis);
+
+                saveLog(thesisId, "进入修改阶段", "SYSTEM", 0L, "系统",
+                        fromStatus, ThesisStatusEnum.STUDENT_REVISING.getCode(), "有" + failCount + "位专家评定不合格，学生需要修改");
+            }
         } else {
             qualification.setStatus("FAIL");
             qualification.setEligible(false);
@@ -233,6 +268,71 @@ public class ReviewService {
         wrapper.eq(ReviewComment::getThesisId, thesisId);
         wrapper.orderByDesc(ReviewComment::getCreateTime);
         return Result.success(reviewCommentMapper.selectList(wrapper));
+    }
+
+    public Result<PageResult<Thesis>> getGraduateReviewingList(PageRequest pageRequest) {
+        Page<Thesis> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
+        LambdaQueryWrapper<Thesis> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Thesis::getStatus, ThesisStatusEnum.GRADUATE_SCHOOL_REVIEWING.getCode());
+        if (pageRequest.getCollege() != null && !pageRequest.getCollege().isEmpty()) {
+            wrapper.eq(Thesis::getCollege, pageRequest.getCollege());
+        }
+        if (pageRequest.getKeyword() != null && !pageRequest.getKeyword().isEmpty()) {
+            wrapper.and(w -> w.like(Thesis::getTitle, pageRequest.getKeyword())
+                    .or().like(Thesis::getStudentName, pageRequest.getKeyword()));
+        }
+        wrapper.orderByAsc(Thesis::getReviewCompleteTime);
+        Page<Thesis> result = thesisMapper.selectPage(page, wrapper);
+        return Result.success(PageResult.of(result.getRecords(), result.getTotal(), pageRequest.getPageNum(), pageRequest.getPageSize()));
+    }
+
+    @Transactional
+    public Result<String> graduateReviewDecision(Long graduateSchoolId, Long thesisId, Boolean eligible, String reason) {
+        Thesis thesis = thesisMapper.selectById(thesisId);
+        if (thesis == null) {
+            return Result.error("论文不存在");
+        }
+        if (!ThesisStatusEnum.GRADUATE_SCHOOL_REVIEWING.getCode().equals(thesis.getStatus())) {
+            return Result.error("该论文不在复审审核状态");
+        }
+
+        SysUser graduateSchool = sysUserMapper.selectById(graduateSchoolId);
+        String fromStatus = thesis.getStatus();
+
+        DefenseQualification qualification = new DefenseQualification();
+        qualification.setThesisId(thesisId);
+        qualification.setStudentId(thesis.getStudentId());
+        qualification.setStudentName(thesis.getStudentName());
+        qualification.setDefenseRound("第" + thesis.getDefenseRound() + "轮（复审）");
+        qualification.setReviewerId(graduateSchoolId);
+        qualification.setReviewerName(graduateSchool.getRealName());
+        qualification.setReviewTime(LocalDateTime.now());
+        qualification.setRemark(reason);
+
+        if (eligible) {
+            qualification.setStatus("PASS");
+            qualification.setEligible(true);
+            qualification.setReason("研究生院复审通过：" + reason);
+
+            thesis.setStatus(ThesisStatusEnum.DEFENSE_ELIGIBLE.getCode());
+            thesis.setCurrentStage("复审通过，已获得答辩资格");
+            saveLog(thesisId, "研究生院复审通过", "GRADUATE_SCHOOL", graduateSchoolId,
+                    graduateSchool.getRealName(), fromStatus, ThesisStatusEnum.DEFENSE_ELIGIBLE.getCode(), reason);
+        } else {
+            qualification.setStatus("FAIL");
+            qualification.setEligible(false);
+            qualification.setReason("研究生院复审不通过：" + reason);
+
+            thesis.setStatus(ThesisStatusEnum.DEFENSE_NOT_ELIGIBLE.getCode());
+            thesis.setCurrentStage("复审未通过，不具备答辩资格");
+            saveLog(thesisId, "研究生院复审不通过", "GRADUATE_SCHOOL", graduateSchoolId,
+                    graduateSchool.getRealName(), fromStatus, ThesisStatusEnum.DEFENSE_NOT_ELIGIBLE.getCode(), reason);
+        }
+
+        defenseQualificationMapper.insert(qualification);
+        thesisMapper.updateById(thesis);
+
+        return Result.success("复审审核完成");
     }
 
     private void saveLog(Long thesisId, String operation, String operatorRole, Long operatorId,

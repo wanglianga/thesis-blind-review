@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS thesis (
     keywords VARCHAR(500),
     version INT DEFAULT 1,
     defense_round INT DEFAULT 1,
+    is_major_revision TINYINT DEFAULT 0,
+    first_review_complete_time DATETIME,
     submit_time DATETIME,
     college_review_time DATETIME,
     expert_match_time DATETIME,
@@ -68,6 +70,7 @@ CREATE TABLE IF NOT EXISTS thesis_version (
     anonymous_file_name VARCHAR(255),
     anonymous_file_url VARCHAR(500),
     revision_description TEXT,
+    difference_description TEXT,
     is_anonymous TINYINT DEFAULT 0,
     uploader_role VARCHAR(50),
     uploader_id BIGINT,
@@ -140,6 +143,11 @@ CREATE TABLE IF NOT EXISTS expert_invitation (
     deadline DATETIME,
     invite_remark TEXT,
     decline_reason TEXT,
+    reminder_count INT DEFAULT 0,
+    is_reassigned TINYINT DEFAULT 0,
+    reassigned_from_id BIGINT,
+    reassigned_reason VARCHAR(200),
+    invalid_comment_reason TEXT,
     create_time DATETIME,
     update_time DATETIME,
     deleted TINYINT DEFAULT 0,
@@ -153,6 +161,7 @@ CREATE TABLE IF NOT EXISTS review_comment (
     expert_id BIGINT NOT NULL,
     expert_name VARCHAR(100),
     invitation_id BIGINT,
+    review_round INT DEFAULT 1,
     overall_evaluation TEXT,
     score DECIMAL(5,2),
     result VARCHAR(50),
@@ -169,7 +178,8 @@ CREATE TABLE IF NOT EXISTS review_comment (
     update_time DATETIME,
     deleted TINYINT DEFAULT 0,
     INDEX idx_thesis_id (thesis_id),
-    INDEX idx_expert_id (expert_id)
+    INDEX idx_expert_id (expert_id),
+    INDEX idx_review_round (thesis_id, review_round)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS defense_qualification (

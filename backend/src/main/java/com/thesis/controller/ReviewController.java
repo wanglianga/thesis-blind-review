@@ -56,4 +56,17 @@ public class ReviewController {
     public Result<List<ReviewComment>> getThesisComments(@PathVariable Long thesisId) {
         return reviewService.getThesisComments(thesisId);
     }
+
+    @GetMapping("/graduate-reviewing-list")
+    public Result<PageResult<Thesis>> getGraduateReviewingList(PageRequest pageRequest) {
+        return reviewService.getGraduateReviewingList(pageRequest);
+    }
+
+    @PostMapping("/graduate-decision/{thesisId}")
+    public Result<String> graduateReviewDecision(@PathVariable Long thesisId,
+                                                 @RequestParam Boolean eligible,
+                                                 @RequestParam String reason) {
+        Long graduateSchoolId = SecurityUtil.getCurrentUserId();
+        return reviewService.graduateReviewDecision(graduateSchoolId, thesisId, eligible, reason);
+    }
 }

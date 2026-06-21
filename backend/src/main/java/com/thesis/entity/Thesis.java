@@ -27,6 +27,8 @@ public class Thesis {
     private String keywords;
     private Integer version;
     private Integer defenseRound;
+    private Integer isMajorRevision;
+    private LocalDateTime firstReviewCompleteTime;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

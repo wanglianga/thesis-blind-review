@@ -14,6 +14,7 @@ public class ReviewComment {
     private Long expertId;
     private String expertName;
     private Long invitationId;
+    private Integer reviewRound;
     private String overallEvaluation;
     private BigDecimal score;
     private String result;

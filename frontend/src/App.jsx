@@ -18,6 +18,7 @@ import SecretaryThesisList from './pages/secretary/ThesisList'
 import GraduateDashboard from './pages/graduate/Dashboard'
 import GraduateExpertMatch from './pages/graduate/ExpertMatch'
 import GraduateReviewProgress from './pages/graduate/ReviewProgress'
+import GraduateMajorRevisionReview from './pages/graduate/MajorRevisionReview'
 import GraduateDefenseQualification from './pages/graduate/DefenseQualification'
 import GraduateSystem from './pages/graduate/System'
 
@@ -110,6 +111,7 @@ function App() {
             <Route index element={<GraduateDashboard />} />
             <Route path="expert-match" element={<GraduateExpertMatch />} />
             <Route path="review-progress" element={<GraduateReviewProgress />} />
+            <Route path="major-revision-review" element={<GraduateMajorRevisionReview />} />
             <Route path="defense-qualification" element={<GraduateDefenseQualification />} />
             <Route path="system" element={<GraduateSystem />} />
           </Routes>

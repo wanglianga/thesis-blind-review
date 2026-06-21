@@ -17,6 +17,7 @@ public class ThesisVersion {
     private String anonymousFileName;
     private String anonymousFileUrl;
     private String revisionDescription;
+    private String differenceDescription;
     private Boolean isAnonymous;
     private String uploaderRole;
     private Long uploaderId;

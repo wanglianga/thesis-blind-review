@@ -55,6 +55,21 @@ function SecretaryThesisList() {
     },
     { title: '当前阶段', dataIndex: 'currentStage', width: 140 },
     {
+      title: '评审截止',
+      dataIndex: 'reviewDeadline',
+      width: 160,
+      render: (t, record) => {
+        if (!t) return '-'
+        const isOverdue = dayjs().isAfter(dayjs(t))
+        return (
+          <Space>
+            <span>{dayjs(t).format('YYYY-MM-DD')}</span>
+            {isOverdue && record.status === 'REVIEWING' && <Tag color="red">已超期</Tag>}
+          </Space>
+        )
+      },
+    },
+    {
       title: '提交时间',
       dataIndex: 'submitTime',
       width: 160,

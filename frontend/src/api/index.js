@@ -121,6 +121,29 @@ export const sendReminder = (invitationId) => {
   })
 }
 
+export const reassignExpert = (data) => {
+  return request({
+    url: '/expert-match/reassign',
+    method: 'post',
+    data,
+  })
+}
+
+export const markCommentInvalid = (data) => {
+  return request({
+    url: '/expert-match/mark-invalid',
+    method: 'post',
+    data,
+  })
+}
+
+export const getThesisCommentsByRound = (thesisId, round) => {
+  return request({
+    url: `/expert-match/thesis/${thesisId}/comments/round/${round}`,
+    method: 'get',
+  })
+}
+
 export const getMyInvitations = (params) => {
   return request({
     url: '/review/my-invitations',
@@ -163,6 +186,22 @@ export const getThesisComments = (thesisId) => {
   return request({
     url: `/review/thesis/${thesisId}/comments`,
     method: 'get',
+  })
+}
+
+export const getGraduateReviewingList = (params) => {
+  return request({
+    url: '/review/graduate-reviewing-list',
+    method: 'get',
+    params,
+  })
+}
+
+export const graduateReviewDecision = (thesisId, eligible, reason) => {
+  return request({
+    url: `/review/graduate-decision/${thesisId}`,
+    method: 'post',
+    params: { eligible, reason },
   })
 }
 
@@ -227,10 +266,26 @@ export const getAllBatches = () => {
   })
 }
 
+export const createBatch = (data) => {
+  return request({
+    url: '/system/batches',
+    method: 'post',
+    data,
+  })
+}
+
 export const getAllDirections = () => {
   return request({
     url: '/system/directions',
     method: 'get',
+  })
+}
+
+export const createDirection = (data) => {
+  return request({
+    url: '/system/directions',
+    method: 'post',
+    data,
   })
 }
 

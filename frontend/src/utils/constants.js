@@ -9,10 +9,12 @@ export const statusMap = {
   PLAGIARISM_PASSED: { text: '查重通过', type: 'success' },
   MATCHING_EXPERTS: { text: '匹配专家中', type: 'info' },
   EXPERTS_MATCHED: { text: '专家已匹配', type: 'success' },
-  REVIEWING: { text: '外审中', type: 'info' },
+  REVIEWING: { text: '盲审处理中', type: 'info' },
   REVIEW_COMPLETED: { text: '评阅完成', type: 'success' },
   STUDENT_REVISING: { text: '学生修改中', type: 'warning' },
   SUPERVISOR_CONFIRMING: { text: '导师确认修改中', type: 'info' },
+  MAJOR_REVISION_REVIEWING: { text: '重大修改复审中', type: 'warning' },
+  GRADUATE_SCHOOL_REVIEWING: { text: '研究生院复审审核', type: 'warning' },
   DEFENSE_ELIGIBLE: { text: '获得答辩资格', type: 'success' },
   DEFENSE_NOT_ELIGIBLE: { text: '未获得答辩资格', type: 'error' },
 }

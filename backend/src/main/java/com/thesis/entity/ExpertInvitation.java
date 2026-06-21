@@ -20,6 +20,11 @@ public class ExpertInvitation {
     private LocalDateTime deadline;
     private String inviteRemark;
     private String declineReason;
+    private Integer reminderCount;
+    private Integer isReassigned;
+    private Long reassignedFromId;
+    private String reassignedReason;
+    private String invalidCommentReason;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

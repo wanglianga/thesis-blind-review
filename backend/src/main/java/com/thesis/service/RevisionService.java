@@ -57,6 +57,7 @@ public class RevisionService {
         version.setAnonymousFileName(dto.getAnonymousFileName());
         version.setAnonymousFileUrl(dto.getAnonymousFileUrl());
         version.setRevisionDescription(dto.getRevisionDescription());
+        version.setDifferenceDescription(dto.getDifferenceDescription());
         version.setIsAnonymous(true);
         version.setUploaderRole("STUDENT");
         version.setUploaderId(studentId);
@@ -116,12 +117,19 @@ public class RevisionService {
 
         if (dto.getPassed()) {
             confirmation.setStatus("APPROVED");
-            thesis.setStatus(ThesisStatusEnum.MATCHING_EXPERTS.getCode());
-            thesis.setCurrentStage("等待研究生院重新匹配专家");
-
-            saveLog(thesis.getId(), "导师确认修改通过", "SUPERVISOR", supervisorId,
-                    supervisor.getRealName(), fromStatus, ThesisStatusEnum.MATCHING_EXPERTS.getCode(),
-                    "导师确认修改通过，可重新送审");
+            if (thesis.getIsMajorRevision() != null && thesis.getIsMajorRevision() == 1) {
+                thesis.setStatus(ThesisStatusEnum.MAJOR_REVISION_REVIEWING.getCode());
+                thesis.setCurrentStage("重大修改复审中");
+                saveLog(thesis.getId(), "导师确认重大修改通过", "SUPERVISOR", supervisorId,
+                        supervisor.getRealName(), fromStatus, ThesisStatusEnum.MAJOR_REVISION_REVIEWING.getCode(),
+                        "导师确认重大修改通过，进入复审阶段");
+            } else {
+                thesis.setStatus(ThesisStatusEnum.MATCHING_EXPERTS.getCode());
+                thesis.setCurrentStage("等待研究生院重新匹配专家");
+                saveLog(thesis.getId(), "导师确认修改通过", "SUPERVISOR", supervisorId,
+                        supervisor.getRealName(), fromStatus, ThesisStatusEnum.MATCHING_EXPERTS.getCode(),
+                        "导师确认修改通过，可重新送审");
+            }
         } else {
             confirmation.setStatus("REJECTED");
             thesis.setStatus(ThesisStatusEnum.STUDENT_REVISING.getCode());

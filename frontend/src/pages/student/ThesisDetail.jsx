@@ -124,64 +124,81 @@ function StudentThesisDetail() {
     {
       key: 'comments',
       label: '评阅意见',
-      children: comments.length > 0 ? (
+      children: (
         <div>
-          {comments.map((comment, idx) => (
-            <Card
-              key={comment.id}
-              className="comment-card"
-              title={
-                <Space>
-                  <Avatar icon={<UserOutlined />} />
-                  <span>外审专家 {idx + 1}</span>
-                  <Tag color={reviewResultMap[comment.result]?.type === 'success' ? 'green' : reviewResultMap[comment.result]?.type === 'error' ? 'red' : 'blue'}>
-                    {reviewResultMap[comment.result]?.text}
-                  </Tag>
-                  {comment.score != null && <span style={{ color: '#faad14' }}>得分：{comment.score}分</span>}
-                </Space>
-              }
-              size="small"
-            >
-              <div style={{ marginBottom: 12 }}>
-                <strong>总体评价：</strong>{comment.overallEvaluation || '-'}
+          {thesis && ['REVIEWING', 'MATCHING_EXPERTS', 'EXPERTS_MATCHED', 'MAJOR_REVISION_REVIEWING', 'GRADUATE_SCHOOL_REVIEWING'].includes(thesis.status) ? (
+            <Card style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
+              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>盲审仍在处理中</div>
+              <div style={{ color: '#666', marginBottom: 16 }}>
+                论文正在接受外审专家评阅，请耐心等待。评阅完成后您将在此处看到详细意见。
               </div>
-              {comment.innovationComment && (
-                <div style={{ marginBottom: 8 }}><strong>创新性评价：</strong>{comment.innovationComment}</div>
-              )}
-              {comment.academicValueComment && (
-                <div style={{ marginBottom: 8 }}><strong>学术价值评价：</strong>{comment.academicValueComment}</div>
-              )}
-              {comment.methodologyComment && (
-                <div style={{ marginBottom: 8 }}><strong>研究方法评价：</strong>{comment.methodologyComment}</div>
-              )}
-              {comment.writingComment && (
-                <div style={{ marginBottom: 8 }}><strong>写作质量评价：</strong>{comment.writingComment}</div>
-              )}
-              {comment.revisionSuggestions && (
-                <div style={{ marginTop: 12, padding: '12px', background: '#fff7e6', borderRadius: 4 }}>
-                  <strong style={{ color: '#fa8c16' }}>修改建议：</strong>
-                  <div style={{ marginTop: 4 }}>{comment.revisionSuggestions}</div>
+              {thesis.reviewDeadline && (
+                <div style={{ color: '#999', fontSize: 13 }}>
+                  预计评阅截止日期：{dayjs(thesis.reviewDeadline).format('YYYY-MM-DD')}
                 </div>
               )}
-              {comment.majorIssues && (
-                <div style={{ marginTop: 12, padding: '12px', background: '#fff1f0', borderRadius: 4 }}>
-                  <strong style={{ color: '#ff4d4f' }}>主要问题：</strong>
-                  <div style={{ marginTop: 4 }}>{comment.majorIssues}</div>
-                </div>
-              )}
-              {comment.minorIssues && (
-                <div style={{ marginTop: 12, padding: '12px', background: '#f6ffed', borderRadius: 4 }}>
-                  <strong style={{ color: '#52c41a' }}>次要问题：</strong>
-                  <div style={{ marginTop: 4 }}>{comment.minorIssues}</div>
-                </div>
-              )}
-              <div style={{ marginTop: 12, textAlign: 'right', color: '#999', fontSize: 12 }}>
-                提交时间：{comment.submitTime ? dayjs(comment.submitTime).format('YYYY-MM-DD HH:mm') : '-'}
-              </div>
             </Card>
-          ))}
+          ) : comments.length > 0 ? (
+            <div>
+              {comments.map((comment, idx) => (
+                <Card
+                  key={comment.id}
+                  className="comment-card"
+                  title={
+                    <Space>
+                      <Avatar icon={<UserOutlined />} />
+                      <span>外审专家 {idx + 1}</span>
+                      <Tag color={reviewResultMap[comment.result]?.type === 'success' ? 'green' : reviewResultMap[comment.result]?.type === 'error' ? 'red' : 'blue'}>
+                        {reviewResultMap[comment.result]?.text}
+                      </Tag>
+                      {comment.score != null && <span style={{ color: '#faad14' }}>得分：{comment.score}分</span>}
+                    </Space>
+                  }
+                  size="small"
+                >
+                  <div style={{ marginBottom: 12 }}>
+                    <strong>总体评价：</strong>{comment.overallEvaluation || '-'}
+                  </div>
+                  {comment.innovationComment && (
+                    <div style={{ marginBottom: 8 }}><strong>创新性评价：</strong>{comment.innovationComment}</div>
+                  )}
+                  {comment.academicValueComment && (
+                    <div style={{ marginBottom: 8 }}><strong>学术价值评价：</strong>{comment.academicValueComment}</div>
+                  )}
+                  {comment.methodologyComment && (
+                    <div style={{ marginBottom: 8 }}><strong>研究方法评价：</strong>{comment.methodologyComment}</div>
+                  )}
+                  {comment.writingComment && (
+                    <div style={{ marginBottom: 8 }}><strong>写作质量评价：</strong>{comment.writingComment}</div>
+                  )}
+                  {comment.revisionSuggestions && (
+                    <div style={{ marginTop: 12, padding: '12px', background: '#fff7e6', borderRadius: 4 }}>
+                      <strong style={{ color: '#fa8c16' }}>修改建议：</strong>
+                      <div style={{ marginTop: 4 }}>{comment.revisionSuggestions}</div>
+                    </div>
+                  )}
+                  {comment.majorIssues && (
+                    <div style={{ marginTop: 12, padding: '12px', background: '#fff1f0', borderRadius: 4 }}>
+                      <strong style={{ color: '#ff4d4f' }}>主要问题：</strong>
+                      <div style={{ marginTop: 4 }}>{comment.majorIssues}</div>
+                    </div>
+                  )}
+                  {comment.minorIssues && (
+                    <div style={{ marginTop: 12, padding: '12px', background: '#f6ffed', borderRadius: 4 }}>
+                      <strong style={{ color: '#52c41a' }}>次要问题：</strong>
+                      <div style={{ marginTop: 4 }}>{comment.minorIssues}</div>
+                    </div>
+                  )}
+                  <div style={{ marginTop: 12, textAlign: 'right', color: '#999', fontSize: 12 }}>
+                    提交时间：{comment.submitTime ? dayjs(comment.submitTime).format('YYYY-MM-DD HH:mm') : '-'}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : <Empty description="暂无评阅意见" />}
         </div>
-      ) : <Empty description="暂无评阅意见" />
+      )
     },
     {
       key: 'logs',

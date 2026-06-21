@@ -4,7 +4,10 @@ import com.thesis.common.PageRequest;
 import com.thesis.common.PageResult;
 import com.thesis.common.Result;
 import com.thesis.dto.ExpertMatchDTO;
+import com.thesis.dto.ExpertReassignDTO;
+import com.thesis.dto.InvalidCommentDTO;
 import com.thesis.entity.ExpertInvitation;
+import com.thesis.entity.ReviewComment;
 import com.thesis.entity.SysUser;
 import com.thesis.entity.Thesis;
 import com.thesis.service.ExpertMatchService;
@@ -52,5 +55,22 @@ public class ExpertMatchController {
     @PostMapping("/reminder/{invitationId}")
     public Result<String> sendReminder(@PathVariable Long invitationId) {
         return expertMatchService.sendReminder(invitationId);
+    }
+
+    @PostMapping("/reassign")
+    public Result<String> reassignExpert(@RequestBody ExpertReassignDTO dto) {
+        Long graduateSchoolId = SecurityUtil.getCurrentUserId();
+        return expertMatchService.reassignExpert(graduateSchoolId, dto);
+    }
+
+    @PostMapping("/mark-invalid")
+    public Result<String> markCommentInvalid(@RequestBody InvalidCommentDTO dto) {
+        Long graduateSchoolId = SecurityUtil.getCurrentUserId();
+        return expertMatchService.markCommentInvalid(graduateSchoolId, dto);
+    }
+
+    @GetMapping("/thesis/{thesisId}/comments/round/{round}")
+    public Result<List<ReviewComment>> getThesisCommentsByRound(@PathVariable Long thesisId, @PathVariable Integer round) {
+        return expertMatchService.getThesisCommentsByRound(thesisId, round);
     }
 }
